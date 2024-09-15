@@ -12,7 +12,6 @@
 		"@dnd-kit/utilities": "^3.2.2",
 		"@fontsource/poppins": "^4.5.9",
 		"@frontapp/plugin-sdk": "^1.1.2",
-		"@highlight-run/client": "workspace:*",
 		"@highlight-run/react": "workspace:*",
 		"@highlight-run/react-mentions": "4.4.2",
 		"@highlight-run/ui": "workspace:*",
