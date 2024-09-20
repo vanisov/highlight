@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/highlight-run/highlight/backend/session_replay"
 	"hash/fnv"
 	"io"
 	"net"
@@ -2290,7 +2291,7 @@ func (r *Resolver) AddTrackPropertiesImpl(ctx context.Context, sessionSecureID s
 	return nil
 }
 
-func (r *Resolver) AddTrackProperties(ctx context.Context, sessionID int, events *parse.ReplayEvents) error {
+func (r *Resolver) AddTrackProperties(ctx context.Context, sessionID int, events *session_replay.ReplayEvents) error {
 	outerSpan, ctx := util.StartSpanFromContext(ctx, "public-graph.AddTrackProperties",
 		util.ResourceName("go.sessions.AddTrackProperties"))
 	defer outerSpan.Finish()
@@ -2299,7 +2300,7 @@ func (r *Resolver) AddTrackProperties(ctx context.Context, sessionID int, events
 	sessionEvents := []*clickhouse.SessionEventRow{}
 
 	for _, event := range events.Events {
-		if event.Type == parse.Custom {
+		if event.Type == session_replay.Custom {
 			dataObject := struct {
 				Tag     string          `json:"tag"`
 				Payload json.RawMessage `json:"payload"`
@@ -2606,7 +2607,7 @@ func (r *Resolver) ProcessPayload(ctx context.Context, sessionSecureID string, e
 			hostUrl := parse.GetHostUrlFromEvents(parsedEvents.Events)
 
 			for _, event := range parsedEvents.Events {
-				if event.Type == parse.FullSnapshot || event.Type == parse.IncrementalSnapshot {
+				if event.Type == session_replay.FullSnapshot || event.Type == session_replay.IncrementalSnapshot {
 					snapshot, err := parse.NewSnapshot(event.Data, hostUrl)
 					if err != nil {
 						log.WithContext(ctx).WithField("projectID", projectID).WithField("sessionID", sessionID).WithField("length", len([]byte(event.Data))).WithError(err).Error("Error unmarshalling snapshot")
@@ -2637,7 +2638,7 @@ func (r *Resolver) ProcessPayload(ctx context.Context, sessionSecureID string, e
 						}
 					}
 
-					if event.Type == parse.FullSnapshot {
+					if event.Type == session_replay.FullSnapshot {
 						hasFullSnapshot = true
 						stylesheetsSpan, _ := util.StartSpanFromContext(ctx, "public-graph.pushPayload",
 							util.ResourceName("go.parseEvents.InjectStylesheets"), util.Tag("project_id", projectID))
@@ -2648,14 +2649,14 @@ func (r *Resolver) ProcessPayload(ctx context.Context, sessionSecureID string, e
 							log.WithContext(ctx).Error(e.Wrap(err, "Error injecting snapshot stylesheets"))
 						}
 					}
-					if event.Type == parse.IncrementalSnapshot {
+					if event.Type == session_replay.IncrementalSnapshot {
 						mouseInteractionEventData, err := parse.UnmarshallMouseInteractionEvent(event.Data)
 						if err != nil {
 							log.WithContext(ctx).Error(e.Wrap(err, "Error unmarshalling incremental event"))
 						}
-						if userEvent := map[parse.EventSource]bool{
-							parse.MouseMove: true, parse.MouseInteraction: true, parse.Scroll: true,
-							parse.Input: true, parse.TouchMove: true, parse.Drag: true,
+						if userEvent := map[session_replay.EventSource]bool{
+							session_replay.MouseMove: true, session_replay.MouseInteraction: true, session_replay.Scroll: true,
+							session_replay.Input: true, session_replay.TouchMove: true, session_replay.Drag: true,
 						}[*mouseInteractionEventData.Source]; userEvent {
 							lastUserInteractionTimestamp = event.Timestamp.Round(time.Millisecond)
 						}

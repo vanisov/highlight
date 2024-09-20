@@ -2,6 +2,7 @@ package kafka_queue
 
 import (
 	"context"
+	"github.com/highlight-run/highlight/backend/session_replay"
 	"math"
 	"time"
 
@@ -36,6 +37,7 @@ const (
 	PushCompressedPayload                  PayloadType = iota
 	PushLogsFlattened                      PayloadType = iota
 	PushTracesFlattened                    PayloadType = iota
+	PushSessionEvent                       PayloadType = iota
 	HealthCheck                            PayloadType = math.MaxInt
 )
 
@@ -43,6 +45,12 @@ type PushCompressedPayloadArgs struct {
 	SessionSecureID string
 	PayloadID       int
 	Data            string `json:"data"`
+}
+
+type PushSessionEventArgs struct {
+	PayloadID       int
+	SessionSecureID string
+	Event           *session_replay.ReplayEvent
 }
 
 type PushPayloadArgs struct {
@@ -163,6 +171,7 @@ type Message struct {
 	ErrorGroupDataSync    *ErrorGroupDataSyncArgs    `json:",omitempty"`
 	ErrorObjectDataSync   *ErrorObjectDataSyncArgs   `json:",omitempty"`
 	PushCompressedPayload *PushCompressedPayloadArgs `json:",omitempty"`
+	PushSessionEvent      *PushSessionEventArgs      `json:",omitempty"`
 }
 
 func (m *Message) GetType() PayloadType {
