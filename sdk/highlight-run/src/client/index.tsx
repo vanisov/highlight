@@ -724,23 +724,13 @@ SessionSecureID: ${this.sessionData.sessionSecureID}`,
 				blockClass: 'highlight-block',
 				emit,
 				recordCrossOriginIframes: this.options.recordCrossOriginIframe,
+				// @ts-ignore
 				privacySetting: this.privacySetting,
 				maskAllInputs,
 				maskInputOptions: maskInputOptions,
 				recordCanvas: this.enableCanvasRecording,
 				sampling: {
-					canvas: {
-						fps: this.samplingStrategy.canvas,
-						fpsManual: this.samplingStrategy.canvasManualSnapshot,
-						resizeFactor: this.samplingStrategy.canvasFactor,
-						clearWebGLBuffer:
-							this.samplingStrategy.canvasClearWebGLBuffer,
-						initialSnapshotDelay:
-							this.samplingStrategy.canvasInitialSnapshotDelay,
-						dataURLOptions: this.samplingStrategy.dataUrlOptions,
-						maxSnapshotDimension:
-							this.samplingStrategy.canvasMaxSnapshotDimension,
-					},
+					canvas: 1,
 				},
 				keepIframeSrcFn: (_src: string) => {
 					return !this.options.recordCrossOriginIframe
@@ -1206,6 +1196,7 @@ SessionSecureID: ${this.sessionData.sessionSecureID}`,
 	}
 
 	async snapshot(element: HTMLCanvasElement) {
+		// @ts-ignore
 		await record.snapshotCanvas(element)
 	}
 
